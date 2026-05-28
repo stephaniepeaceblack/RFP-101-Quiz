@@ -1,0 +1,965 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>RFP 101 — Session Quizzes</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --blue: #2A6397;
+    --blue-dark: #1e4a72;
+    --blue-light: #e8f0f8;
+    --accent: #f0a500;
+    --white: #ffffff;
+    --gray-light: #f5f7fa;
+    --gray-mid: #dce3ec;
+    --gray-text: #5a6472;
+    --green: #27a06b;
+    --red: #d94f4f;
+    --radius: 12px;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'DM Sans', sans-serif;
+    background: var(--gray-light);
+    color: #1a2332;
+    min-height: 100vh;
+  }
+
+  /* HEADER */
+  .site-header {
+    background: var(--blue-dark);
+    padding: 28px 40px;
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    border-bottom: 4px solid var(--accent);
+  }
+
+  .feather-icon {
+    width: 48px;
+    height: 48px;
+    flex-shrink: 0;
+  }
+
+  .header-text h1 {
+    font-family: 'Playfair Display', serif;
+    font-size: 26px;
+    color: var(--white);
+    line-height: 1.1;
+  }
+
+  .header-text p {
+    font-size: 13px;
+    color: #a8c4dc;
+    margin-top: 4px;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+  }
+
+  /* LAYOUT */
+  .container {
+    max-width: 860px;
+    margin: 0 auto;
+    padding: 40px 24px 80px;
+  }
+
+  /* SESSION NAV TABS */
+  .session-nav {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-bottom: 36px;
+  }
+
+  .session-tab {
+    background: var(--white);
+    border: 2px solid var(--gray-mid);
+    border-radius: 8px;
+    padding: 8px 14px;
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--gray-text);
+    cursor: pointer;
+    transition: all 0.18s ease;
+    font-family: 'DM Sans', sans-serif;
+  }
+
+  .session-tab:hover {
+    border-color: var(--blue);
+    color: var(--blue);
+  }
+
+  .session-tab.active {
+    background: var(--blue);
+    border-color: var(--blue);
+    color: var(--white);
+  }
+
+  .session-tab.completed {
+    border-color: var(--green);
+    color: var(--green);
+  }
+
+  .session-tab.completed.active {
+    background: var(--green);
+    border-color: var(--green);
+    color: var(--white);
+  }
+
+  /* QUIZ CARD */
+  .quiz-card {
+    background: var(--white);
+    border-radius: var(--radius);
+    box-shadow: 0 2px 16px rgba(42,99,151,0.08);
+    overflow: hidden;
+  }
+
+  .quiz-header {
+    background: linear-gradient(135deg, var(--blue-dark) 0%, var(--blue) 100%);
+    padding: 28px 36px;
+    color: var(--white);
+  }
+
+  .quiz-phase {
+    font-size: 11px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: #a8c4dc;
+    margin-bottom: 6px;
+  }
+
+  .quiz-title {
+    font-family: 'Playfair Display', serif;
+    font-size: 22px;
+    line-height: 1.25;
+  }
+
+  .quiz-progress {
+    margin-top: 16px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+
+  .progress-bar-wrap {
+    flex: 1;
+    height: 6px;
+    background: rgba(255,255,255,0.2);
+    border-radius: 3px;
+    overflow: hidden;
+  }
+
+  .progress-bar-fill {
+    height: 100%;
+    background: var(--accent);
+    border-radius: 3px;
+    transition: width 0.35s ease;
+  }
+
+  .progress-label {
+    font-size: 12px;
+    color: #a8c4dc;
+    white-space: nowrap;
+  }
+
+  /* QUESTIONS */
+  .quiz-body {
+    padding: 36px;
+  }
+
+  .question-block {
+    display: none;
+  }
+
+  .question-block.active {
+    display: block;
+    animation: fadeIn 0.25s ease;
+  }
+
+  @keyframes fadeIn {
+    from { opacity: 0; transform: translateY(8px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  .question-number {
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--blue);
+    font-weight: 500;
+    margin-bottom: 10px;
+  }
+
+  .question-text {
+    font-size: 17px;
+    font-weight: 500;
+    line-height: 1.5;
+    margin-bottom: 24px;
+    color: #1a2332;
+  }
+
+  .options-list {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    margin-bottom: 28px;
+  }
+
+  .option-btn {
+    display: flex;
+    align-items: flex-start;
+    gap: 14px;
+    background: var(--gray-light);
+    border: 2px solid var(--gray-mid);
+    border-radius: 10px;
+    padding: 14px 18px;
+    cursor: pointer;
+    text-align: left;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 14.5px;
+    color: #1a2332;
+    line-height: 1.45;
+    transition: all 0.16s ease;
+    width: 100%;
+  }
+
+  .option-btn:hover:not(:disabled) {
+    border-color: var(--blue);
+    background: var(--blue-light);
+  }
+
+  .option-letter {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 26px;
+    height: 26px;
+    border-radius: 50%;
+    background: var(--gray-mid);
+    font-size: 12px;
+    font-weight: 700;
+    color: var(--gray-text);
+    flex-shrink: 0;
+    margin-top: 1px;
+    transition: all 0.16s ease;
+  }
+
+  .option-btn:hover:not(:disabled) .option-letter {
+    background: var(--blue);
+    color: var(--white);
+  }
+
+  .option-btn.correct {
+    border-color: var(--green);
+    background: #edf8f3;
+  }
+
+  .option-btn.correct .option-letter {
+    background: var(--green);
+    color: var(--white);
+  }
+
+  .option-btn.incorrect {
+    border-color: var(--red);
+    background: #fdf0f0;
+  }
+
+  .option-btn.incorrect .option-letter {
+    background: var(--red);
+    color: var(--white);
+  }
+
+  .option-btn.reveal-correct {
+    border-color: var(--green);
+    background: #edf8f3;
+    opacity: 0.75;
+  }
+
+  .option-btn:disabled {
+    cursor: default;
+  }
+
+  /* FEEDBACK */
+  .feedback-box {
+    display: none;
+    border-radius: 8px;
+    padding: 14px 18px;
+    font-size: 13.5px;
+    line-height: 1.5;
+    margin-bottom: 24px;
+  }
+
+  .feedback-box.correct-fb {
+    background: #edf8f3;
+    border-left: 4px solid var(--green);
+    color: #1a5c3a;
+    display: block;
+  }
+
+  .feedback-box.incorrect-fb {
+    background: #fdf0f0;
+    border-left: 4px solid var(--red);
+    color: #7a2020;
+    display: block;
+  }
+
+  .feedback-label {
+    font-weight: 700;
+    margin-bottom: 4px;
+  }
+
+  /* NAV BUTTONS */
+  .quiz-nav {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 12px;
+  }
+
+  .btn {
+    padding: 11px 24px;
+    border-radius: 8px;
+    border: none;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 14px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.16s ease;
+  }
+
+  .btn-primary {
+    background: var(--blue);
+    color: var(--white);
+  }
+
+  .btn-primary:hover {
+    background: var(--blue-dark);
+  }
+
+  .btn-ghost {
+    background: transparent;
+    border: 2px solid var(--gray-mid);
+    color: var(--gray-text);
+  }
+
+  .btn-ghost:hover {
+    border-color: var(--blue);
+    color: var(--blue);
+  }
+
+  .btn:disabled {
+    opacity: 0.35;
+    cursor: default;
+  }
+
+  /* RESULTS */
+  .results-block {
+    display: none;
+    text-align: center;
+    padding: 20px 0 10px;
+  }
+
+  .results-block.active {
+    display: block;
+    animation: fadeIn 0.3s ease;
+  }
+
+  .score-ring {
+    width: 100px;
+    height: 100px;
+    border-radius: 50%;
+    margin: 0 auto 20px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: 'Playfair Display', serif;
+    font-size: 30px;
+    font-weight: 900;
+    color: var(--white);
+  }
+
+  .score-ring.high { background: var(--green); }
+  .score-ring.mid { background: var(--accent); }
+  .score-ring.low { background: var(--red); }
+
+  .results-block h3 {
+    font-family: 'Playfair Display', serif;
+    font-size: 20px;
+    margin-bottom: 8px;
+  }
+
+  .results-block p {
+    font-size: 14px;
+    color: var(--gray-text);
+    margin-bottom: 28px;
+    line-height: 1.55;
+  }
+
+  .result-actions {
+    display: flex;
+    gap: 12px;
+    justify-content: center;
+    flex-wrap: wrap;
+  }
+
+  /* SCORE SUMMARY BAR */
+  .score-summary {
+    background: var(--blue-light);
+    border-radius: 10px;
+    padding: 14px 20px;
+    margin-top: 24px;
+    display: flex;
+    gap: 24px;
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+
+  .score-stat {
+    text-align: center;
+  }
+
+  .score-stat .val {
+    font-family: 'Playfair Display', serif;
+    font-size: 22px;
+    color: var(--blue);
+  }
+
+  .score-stat .lbl {
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: var(--gray-text);
+    margin-top: 2px;
+  }
+</style>
+</head>
+<body>
+
+<div class="site-header">
+  <svg class="feather-icon" viewBox="0 0 186 186" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <path d="M93 10 C130 10 170 50 170 110 C170 150 140 175 93 175 C46 175 16 150 16 110 C16 50 56 10 93 10Z" fill="none"/>
+    <path d="M155 25 C155 25 120 30 95 55 C70 80 60 115 65 145 C65 145 75 120 95 105 C115 90 145 85 160 60 C172 40 155 25 155 25Z" fill="#5aaed6" opacity="0.5"/>
+    <path d="M158 22 C158 22 125 28 98 52 C72 76 62 112 68 143 C68 143 70 135 75 125" stroke="#2A6397" stroke-width="3" fill="none" stroke-linecap="round"/>
+    <path d="M75 125 C80 108 92 95 108 87 C124 79 143 77 155 65" stroke="#2A6397" stroke-width="2.5" fill="none" stroke-linecap="round"/>
+    <path d="M75 125 L68 155" stroke="#2A6397" stroke-width="3" stroke-linecap="round"/>
+    <path d="M68 155 L64 165 L72 158" stroke="#2A6397" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+  </svg>
+  <div class="header-text">
+    <h1>RFP 101 — Knowledge Check</h1>
+    <p>SPB Consulting · Sessions 1–9</p>
+  </div>
+</div>
+
+<div class="container">
+
+  <div class="session-nav" id="sessionNav"></div>
+
+  <div class="quiz-card" id="quizCard">
+    <div class="quiz-header">
+      <div class="quiz-phase" id="quizPhase"></div>
+      <div class="quiz-title" id="quizTitle"></div>
+      <div class="quiz-progress">
+        <div class="progress-bar-wrap"><div class="progress-bar-fill" id="progressFill" style="width:0%"></div></div>
+        <div class="progress-label" id="progressLabel">0 of 5</div>
+      </div>
+    </div>
+    <div class="quiz-body" id="quizBody">
+      <!-- questions injected here -->
+    </div>
+  </div>
+
+</div>
+
+<script>
+const SESSIONS = [
+  {
+    id: 1,
+    phase: "Phase 1 · Session 1",
+    title: "What Is an RFP and Why It Matters in K-12",
+    questions: [
+      {
+        q: "Which of the following best describes the primary purpose of a Request for Proposal (RFP) in K-12 procurement?",
+        options: ["To advertise job openings within a school district", "To standardize evaluation criteria and ensure competitive, transparent bidding", "To notify parents about new technology programs", "To request funding from state education agencies"],
+        answer: 1,
+        explanation: "RFPs formalize the procurement process — they standardize evaluation criteria, ensure competitive and transparent bidding, and meet legal and compliance requirements."
+      },
+      {
+        q: "A district is purchasing a new Learning Management System estimated at $150,000. This falls into which RFP tier?",
+        options: ["Tier 3 — Lower Complexity (under $25K)", "Tier 2 — Medium Complexity ($25K–$100K)", "Tier 1 — High Complexity ($100K+)", "Tier 4 — State Procurement"],
+        answer: 2,
+        explanation: "Tier 1 covers high-complexity purchases over $100K, including Learning Management Systems, Student Information Systems, and district-wide curriculum platforms."
+      },
+      {
+        q: "How many vendors typically compete in a K-12 RFP response?",
+        options: ["2–3 vendors", "4–6 vendors", "8–12 vendors", "15–20 vendors"],
+        answer: 2,
+        explanation: "By the numbers: 8–12 vendors typically compete, sales cycles run 6–18 months, and $25K+ is the typical RFP threshold."
+      },
+      {
+        q: "A Superintendent and a Technology Director are both highly involved in an upcoming procurement decision. How should you classify them in a stakeholder map?",
+        options: ["Low Power / High Interest — Keep Informed", "High Power / Low Interest — Keep Satisfied", "High Power / High Interest — Manage Closely", "Low Power / Low Interest — Monitor"],
+        answer: 2,
+        explanation: "Superintendent, Curriculum Director, Technology Director, and CFO all fall in the High Power / High Interest quadrant — the group you manage most closely."
+      },
+      {
+        q: "During which phase of the Educational Buyer's Journey does formal RFP development typically occur?",
+        options: ["Phase 1: Problem Recognition (Months 1–3)", "Phase 2: Research & Requirements (Months 4–6)", "Phase 3: Formal Procurement (Months 7–9)", "Phase 4: Selection & Implementation (Months 10–18)"],
+        answer: 2,
+        explanation: "Phase 3 (Months 7–9) is when formal procurement happens — RFP development, vendor outreach, and proposal evaluation all occur here."
+      }
+    ]
+  },
+  {
+    id: 2,
+    phase: "Phase 1 · Session 2",
+    title: "Anatomy of a K-12 RFP",
+    questions: [
+      {
+        q: "In a typical K-12 RFP scoring rubric, which category carries the highest point weight?",
+        options: ["Company Stability (10–15%)", "Cost & Value (15–25%)", "Program Design / Core Functionality (30–40%)", "Experience & References (15–20%)"],
+        answer: 2,
+        explanation: "Program Design — covering core functionality, features, and outcomes — typically carries the most weight at 30–40%, making it the highest-leverage section of your response."
+      },
+      {
+        q: "Which stakeholder group is typically responsible for providing the end-user perspective on an evaluation committee?",
+        options: ["The Business/Finance Representative", "Teacher Representatives", "The Procurement Officer", "Legal Counsel"],
+        answer: 1,
+        explanation: "Teacher Representatives serve as end-user voices on evaluation committees, alongside Curriculum Directors, Federal/State Program Directors, Budget representatives, and sometimes Legal."
+      },
+      {
+        q: "Implementation & Support typically carries what percentage weight in K-12 RFP scoring?",
+        options: ["5–10%", "20–25%", "30–35%", "40–45%"],
+        answer: 1,
+        explanation: "Implementation & Support — covering training, onboarding, ongoing support, and timeline — typically accounts for 20–25% of total scoring."
+      },
+      {
+        q: "Which of the following best describes the key insight about how K-12 procurement decisions are actually made?",
+        options: ["The vendor with the lowest price always wins", "The highest individual evaluator score determines the winner", "Decisions involve group consensus, political influences, and existing relationships — so the highest score doesn't always win", "Board members make the final call independently"],
+        answer: 2,
+        explanation: "Committee dynamics matter enormously: individual scores, group consensus, political influences, existing relationships, and champion identification all shape the final outcome. The highest score doesn't guarantee the win."
+      },
+      {
+        q: "When evaluating an RFP response, different committee members view your solution through which primary lens?",
+        options: ["A shared, unified organizational perspective", "Their own role's responsibilities, risks, and goals", "The district's historical vendor preferences", "The superintendent's stated priorities only"],
+        answer: 1,
+        explanation: "Each stakeholder — Curriculum, Federal/State Programs, Administrative, IT — evaluates your solution through their own role's lens. A strong response shows how each audience sees value."
+      }
+    ]
+  },
+  {
+    id: 3,
+    phase: "Phase 1 · Session 3",
+    title: "Reading an RFP Strategically",
+    questions: [
+      {
+        q: "Using the Strategic Read Order, what is the FIRST section you should read in any RFP?",
+        options: ["The Scope of Work — to understand what the district needs", "The full document from page 1 to end", "Scoring & Evaluation — to understand how you will be judged", "Attachments & Appendices — to find required forms"],
+        answer: 2,
+        explanation: "The Scoring & Evaluation section comes first in the strategic read order. Point weights tell you where to invest your time before reading anything else."
+      },
+      {
+        q: "An RFP states: 'Proposals will include a detailed implementation timeline.' Is this requirement mandatory or preferred?",
+        options: ["Preferred — 'will' is aspirational language", "Mandatory — 'will' makes this a required submission element", "Optional — vendors can substitute a summary instead", "Conditional — only mandatory if implementation is over 90 days"],
+        answer: 1,
+        explanation: "The word 'will' makes this mandatory. No timeline = incomplete submission. Recognizing mandatory signal words — shall, must, will, required — is a core strategic reading skill."
+      },
+      {
+        q: "Which of the following is the most dangerous place to miss a requirement in a K-12 RFP?",
+        options: ["The cover page and introduction", "Appendices, attachments, and referenced documents", "The vendor Q&A response log", "The district's website homepage"],
+        answer: 1,
+        explanation: "Appendices, attachments, legal terms, the definitions section, addenda, and referenced documents are where requirements hide — and where vendors consistently miss fatal requirements."
+      },
+      {
+        q: "What is the primary purpose of building a compliance matrix before writing your response?",
+        options: ["To calculate your total bid cost", "To impress evaluators with your organizational skills", "To ensure no requirement is missed and every owner knows their responsibility", "To shorten the overall response length"],
+        answer: 2,
+        explanation: "A compliance matrix — built before writing begins — ensures nothing gets missed and everyone knows their lane. It becomes your response roadmap."
+      },
+      {
+        q: "A requirement states vendors 'should' provide three years of audited financials. How should you classify it in your compliance matrix?",
+        options: ["MUST — treat all financial requirements as mandatory", "SHOULD — preferred but not meeting it costs points, not your seat at the table", "MAY — completely optional, include only if beneficial", "SKIP — 'should' requirements are typically ignored by evaluators"],
+        answer: 1,
+        explanation: "SHOULD is preferred language. Not meeting a SHOULD requirement costs points but does not disqualify you — unlike MUST/SHALL requirements, which are non-negotiable."
+      }
+    ]
+  },
+  {
+    id: 4,
+    phase: "Phase 2 · Session 4",
+    title: "How to Qualify an Opportunity",
+    questions: [
+      {
+        q: "The Four-Factor Framework for bid qualification assigns how many points to each factor?",
+        options: ["10 points each (40 total)", "25 points each (100 total)", "20 points each (80 total)", "50 points each (200 total)"],
+        answer: 1,
+        explanation: "Each of the four factors — Fit, Competition, Resources, and Timeline — is worth 25 points, for a total of 100 points."
+      },
+      {
+        q: "Using the scoring scale, an opportunity that scores 58 points should be treated how?",
+        options: ["Excellent opportunity — pursue immediately", "Good opportunity with minor concerns — pursue strategically", "Marginal — pursue with limited resources", "High-risk or poor fit — do not pursue"],
+        answer: 3,
+        explanation: "Below 65 points = high-risk or poor fit, do not pursue. The scoring thresholds: 85–100 excellent, 75–90 good, 65–75 marginal, below 65 do not pursue."
+      },
+      {
+        q: "Which of the following represents a hidden cost of pursuing low-quality RFP opportunities?",
+        options: ["Reduced need for competitive intelligence", "Opportunity cost of missing better prospects and team burnout", "Lower pricing pressure from competitors", "Faster internal review and approval timelines"],
+        answer: 1,
+        explanation: "Poor qualification carries real hidden costs: 40–80 hours of team time per response, opportunity cost from missing stronger bids, resource strain, burnout, and damage to win rates."
+      },
+      {
+        q: "Within the Four-Factor Framework, what does the 'Competition' factor primarily evaluate?",
+        options: ["How many internal team members are available to write the response", "Competitive landscape, incumbent relationships, and differentiation opportunities", "The RFP's page count and submission complexity", "Whether the district has issued RFPs before"],
+        answer: 1,
+        explanation: "The Competition factor (25 points) evaluates the competitive landscape, incumbent advantages, market position, brand recognition, and your relationship advantages versus known competitors."
+      },
+      {
+        q: "What is 'win probability' in the context of bid/no-bid analysis?",
+        options: ["The percentage of the total contract value you expect to earn", "An assessment of your likelihood of winning based on relationship, political, and market factors — beyond the numeric score", "The number of previous wins you have with this district", "The discount rate you apply to your pricing model"],
+        answer: 1,
+        explanation: "Win probability goes beyond the numeric score. Relationship factors (existing contacts, champions), political factors (budget certainty, decision-making dynamics), and market factors (incumbent switching costs) all feed into a realistic probability assessment."
+      }
+    ]
+  },
+  {
+    id: 5,
+    phase: "Phase 2 · Session 5",
+    title: "Using AI to Shred an RFP",
+    questions: [
+      {
+        q: "What is the recommended first step in the AI Shred Workflow?",
+        options: ["Generate the compliance matrix immediately", "Run the Go/No-Go matrix prompt", "Upload the full RFP and ground the model by confirming key document facts", "Ask the AI to summarize the RFP in one paragraph"],
+        answer: 2,
+        explanation: "Step 1 is grounding the model: upload the full RFP and prompt the AI to confirm the issuing district, RFP number, deadline, and page count — quoting directly, not inferring."
+      },
+      {
+        q: "Which AI tool capability is most critical for processing a full K-12 RFP?",
+        options: ["Image generation support", "Long context window with document upload support", "Social media integration", "Auto-formatting into PowerPoint slides"],
+        answer: 1,
+        explanation: "Long context window and document upload (PDF/DOCX) are essential — free-tier tools with short context windows cannot ingest a full RFP in one session."
+      },
+      {
+        q: "Which of the following is a known failure mode when using AI to analyze RFPs?",
+        options: ["AI always underestimates the page count", "AI refuses to read legal language", "AI may hallucinate requirements that 'should' exist but don't", "AI cannot identify submission deadlines"],
+        answer: 2,
+        explanation: "Common AI failure modes include hallucinated requirements, misattributed page numbers, false confidence on ambiguous language, aggregating contradictory statements, and misreading tables with merged cells."
+      },
+      {
+        q: "What time savings does AI-assisted RFP analysis typically provide for the Go/No-Go step alone?",
+        options: ["5–10 minutes", "30–60 minutes", "1–2 hours", "4–6 hours"],
+        answer: 2,
+        explanation: "The Go/No-Go matrix step alone saves 1–2 hours per RFP. The full AI shred workflow compresses what used to take 2–8 hours into 10–30 minutes for the first pass."
+      },
+      {
+        q: "After AI generates a compliance matrix, what is your required next step?",
+        options: ["Accept the output and begin writing immediately", "Verify every mandatory requirement against the source document", "Share it with the sales team for pricing input", "Archive it in the content library without review"],
+        answer: 1,
+        explanation: "The rule is firm: AI gives you the first draft. You verify every mandatory requirement against the source. AI shifts your work from extraction to judgment — not from extraction to done."
+      }
+    ]
+  },
+  {
+    id: 6,
+    phase: "Phase 2 · Session 6",
+    title: "Project Management for RFP Response",
+    questions: [
+      {
+        q: "In the standard RFP team structure, who is primarily responsible for pricing strategy and client engagement?",
+        options: ["The RFP/Proposal Team", "The Sales Team", "Marketing", "Legal"],
+        answer: 1,
+        explanation: "Sales owns pricing strategy, negotiation parameters, client engagement, and stakeholder communication. The RFP/Proposal Team handles project management, writing, and go/no-bid analysis."
+      },
+      {
+        q: "In the Standard 30-Day Timeline Template, what phase occurs on Days 8–20?",
+        options: ["Qualification and Go/No-Go decision", "Planning, kickoff, and timeline creation", "Content Development and Draft Completion", "Internal Review and Approvals"],
+        answer: 2,
+        explanation: "Days 8–20 are the Development phase: content creation and pricing, resulting in a complete first draft. Development is the longest single phase in the 30-day template."
+      },
+      {
+        q: "What is the correct top-level folder naming convention in the recommended Google Drive RFP filing system?",
+        options: ["RFP Number — Vendor Name", "District Name (State Abbreviation) as the top-level folder", "Project Type — Due Date", "Sales Rep Name — Budget Tier"],
+        answer: 1,
+        explanation: "The structure is: District Name (State Abbreviation) as the top-level folder, then District Name – RFP Name (RFP #) as the project folder, with subfolders for Bid Docs, Working Docs, Final Docs, and Post-Submission Docs."
+      },
+      {
+        q: "Which team is responsible for reviewing legal language and insurance requirements in an RFP response?",
+        options: ["Marketing", "Program Team", "Legal", "Customer Success"],
+        answer: 2,
+        explanation: "Legal handles contract terms, risk assessment, compliance requirement validation, and legal language review. Finance handles pricing models and cost analysis."
+      },
+      {
+        q: "What are the five pipeline management stages referenced in the session's PM system guidance?",
+        options: ["Draft → Edit → Review → Approve → Archive", "Identified → Drafting → Submitted → Won/Lost", "Received → Qualified → Assigned → Written → Filed", "Open → Active → Complete → Won → Closed"],
+        answer: 1,
+        explanation: "The pipeline stages for tracking and forecasting are: Identified → Drafting → Submitted → Won/Lost, with win-rate metrics tracked across the pipeline."
+      }
+    ]
+  },
+  {
+    id: 7,
+    phase: "Phase 3 · Session 7",
+    title: "Content Creation & Management",
+    questions: [
+      {
+        q: "The STAR Method structures RFP response narratives around which four elements?",
+        options: ["Strategy, Tactics, Assessment, Results", "Situation, Task, Action, Result", "Summary, Technical, Approach, References", "Scope, Timeline, Alignment, Reporting"],
+        answer: 1,
+        explanation: "STAR = Situation (the educational challenge or context), Task (what needed to be accomplished), Action (your specific solution approach), Result (quantified outcomes and measurable impact)."
+      },
+      {
+        q: "When evaluators initially read your RFP response sections, approximately how much time do they spend on each?",
+        options: ["15–20 minutes per section", "3–7 minutes per section", "30–45 minutes per section", "1–2 minutes per section"],
+        answer: 1,
+        explanation: "Evaluators spend only 3–7 minutes per section initially — scanning for compliance before detailed reading, then comparing responses side by side. Front-load compliance and evidence accordingly."
+      },
+      {
+        q: "Using the Compliance-First writing approach, what belongs in Paragraph 1 of your response to a requirement?",
+        options: ["Company history and background information", "A direct compliance statement confirming you meet the requirement", "A list of all product features", "Supporting case study narrative"],
+        answer: 1,
+        explanation: "Paragraph 1 = direct compliance statement ('Yes, our platform fully meets this requirement by...'). Then specific evidence (P2), educational context and benefits (P3), and supporting examples (P4)."
+      },
+      {
+        q: "What is the recommended first step in building a content library — before organizing anything?",
+        options: ["Purchase proposal management software", "Conduct an audit: gather everything the team uses and ask if it is accurate, reusable, and findable", "Assign content owners to each section", "Delete all content older than two years"],
+        answer: 1,
+        explanation: "Start with an audit, not an organization system. Gather everything, then ask three questions: Is it accurate today? Is it reusable? Is it findable? Content that fails accuracy gets retired or flagged immediately."
+      },
+      {
+        q: "Which of the following is classified as Tier 1 Evidence — the strongest type to lead with in an RFP response?",
+        options: ["General market positioning statements", "Company awards and industry recognition", "Quantified client outcomes, specific feature demonstrations, and compliance certifications", "Vendor testimonials and case study narratives"],
+        answer: 2,
+        explanation: "Tier 1 Evidence (lead with this): quantified client outcomes and metrics, specific feature demonstrations, and compliance certifications. Testimonials and case studies are Tier 2 supporting evidence."
+      }
+    ]
+  },
+  {
+    id: 8,
+    phase: "Phase 3 · Session 8",
+    title: "Response Strategy & Win Themes",
+    questions: [
+      {
+        q: "What is the correct formula for developing a win theme?",
+        options: ["Product Features + Company History + Price = Win Theme", "Client Need + Your Advantage + Proof = Win Theme", "Market Size + Competitive Gap + Timeline = Win Theme", "Evaluation Score + Reference Quality + Compliance Rate = Win Theme"],
+        answer: 1,
+        explanation: "The Win Theme Formula is: Client Need + Your Advantage + Proof = Win Theme. Example: district needs to improve reading scores → your SoR-aligned intervention → 34% improvement in 6 months at a similar district."
+      },
+      {
+        q: "Which evaluation criterion should receive the strongest win theme emphasis, according to the session guidance?",
+        options: ["The criterion your solution is weakest on", "Criteria where all vendors perform equally", "The highest-weighted criteria — especially where competitors are weakest", "Cost sections only, since price drives final decisions"],
+        answer: 2,
+        explanation: "Emphasize themes aligned with the highest-weighted criteria and differentiate where competitors are weakest. Connecting your theme strategy to point weights is what separates strategic responses from generic ones."
+      },
+      {
+        q: "Which of the following is NOT one of the three win theme categories described in the session?",
+        options: ["Solution Themes — unique capabilities and proven outcomes", "Partnership Themes — support quality and long-term viability", "Pricing Themes — cost leadership and discount structures", "Risk Mitigation Themes — proven track record and change management"],
+        answer: 2,
+        explanation: "The three win theme categories are Solution Themes, Partnership Themes, and Risk Mitigation Themes. Pricing is addressed in compliance strategy but is not a win theme category itself."
+      },
+      {
+        q: "When your company has a genuine capability gap versus competitor offerings, what is the strategic approach?",
+        options: ["Omit the section entirely to avoid drawing attention", "Claim full compliance regardless of the gap", "Acknowledge the gap with a solution roadmap and reframe as a strength in context", "Lower your price to compensate"],
+        answer: 2,
+        explanation: "Acknowledge gaps with solution roadmaps and position weaknesses strategically in context. The session example: narrower program offerings reframed as 'The Specialist Advantage' — unmatched depth over diluted breadth."
+      },
+      {
+        q: "Win themes should be woven throughout which structural sections of a response?",
+        options: ["The Executive Summary only", "Pricing sections only, to justify cost", "The Executive Summary, Technical Sections, Implementation, Experience, and Pricing — building progressively throughout", "Only sections where the district explicitly requested differentiators"],
+        answer: 2,
+        explanation: "Win themes run throughout the entire response: Executive Summary (lead with strongest themes), Technical (solution themes), Implementation (partnership themes), Experience (proof), and Pricing (value justification)."
+      }
+    ]
+  },
+  {
+    id: 9,
+    phase: "Phase 3 · Session 9",
+    title: "Assembly, Review, and Submission",
+    questions: [
+      {
+        q: "In the Seven-Step Assembly Workflow, what step comes directly after assembling the response in the required order?",
+        options: ["Send for executive review", "Apply consistent formatting and branding", "Generate the table of contents", "Insert graphics and appendices"],
+        answer: 1,
+        explanation: "The seven steps are: Collect → Verify → Assemble → Brand (apply consistent formatting and branding) → Enhance → Navigate → Review. Branding immediately follows assembly."
+      },
+      {
+        q: "Quality Reviewers have a specific deadline — they must complete their review by when?",
+        options: ["The day of the submission deadline", "24 hours before the submission deadline", "48 hours before the submission deadline", "One week before the submission deadline"],
+        answer: 1,
+        explanation: "Quality Reviewers — responsible for final compliance verification, proofreading, and production readiness — must complete their work 24 hours before submission (NOT the due date). This buffer protects against last-minute disasters."
+      },
+      {
+        q: "The Three-Dimensional Quality Assurance Checklist covers which three dimensions?",
+        options: ["Compliance, Pricing, and References", "Content Quality, Format Quality, and Technical Quality", "Strategy, Editing, and Design", "Executive, Legal, and Financial Review"],
+        answer: 1,
+        explanation: "The three QA dimensions are: Content Quality (requirements addressed, win themes, evidence), Format Quality (branding, headings, page limits), and Technical Quality (grammar, data accuracy, working links, attachments)."
+      },
+      {
+        q: "When responding to post-submission clarification requests from a district, what is the best practice?",
+        options: ["Rewrite your entire response to fix any perceived weaknesses", "Provide clear, direct answers only to the questions asked — and use the opportunity to reinforce win themes subtly", "Decline all questions to avoid creating inconsistencies", "Forward all questions to legal before any response"],
+        answer: 1,
+        explanation: "Respond within the requested timeframe (usually 24–48 hours), answer only what was asked, maintain consistency with the original response, and use the opportunity to subtly reinforce win themes. Document all communication."
+      },
+      {
+        q: "Which item is part of the Submission Requirements compliance verification checklist?",
+        options: ["Confirming the evaluator committee member names", "Verifying correct number of copies, required file formats, completed forms, and submission deadline with time zone", "Checking competitor pricing benchmarks", "Confirming the district's budget approval timeline"],
+        answer: 1,
+        explanation: "Submission Requirements verification covers: correct number of copies, required file formats and naming, all forms completed and signed, and deadline/delivery method confirmed — including time zone verification."
+      }
+    ]
+  }
+];
+
+let currentSession = 0;
+let currentQuestion = 0;
+let answered = false;
+let sessionScores = new Array(9).fill(null);
+
+function renderNav() {
+  const nav = document.getElementById('sessionNav');
+  nav.innerHTML = SESSIONS.map((s, i) => {
+    let cls = 'session-tab';
+    if (i === currentSession) cls += ' active';
+    if (sessionScores[i] !== null) cls += ' completed';
+    return `<button class="${cls}" onclick="loadSession(${i})">Session ${s.id}</button>`;
+  }).join('');
+}
+
+function loadSession(idx) {
+  currentSession = idx;
+  currentQuestion = 0;
+  answered = false;
+  renderNav();
+  renderQuestion();
+}
+
+function renderQuestion() {
+  const session = SESSIONS[currentSession];
+  const q = session.questions[currentQuestion];
+  const total = session.questions.length;
+
+  document.getElementById('quizPhase').textContent = session.phase;
+  document.getElementById('quizTitle').textContent = session.title;
+  document.getElementById('progressFill').style.width = ((currentQuestion / total) * 100) + '%';
+  document.getElementById('progressLabel').textContent = `${currentQuestion} of ${total}`;
+
+  const body = document.getElementById('quizBody');
+
+  const letters = ['A','B','C','D'];
+  const optionsHTML = q.options.map((opt, i) =>
+    `<button class="option-btn" onclick="selectAnswer(${i})" id="opt${i}">
+      <span class="option-letter">${letters[i]}</span>
+      <span>${opt}</span>
+    </button>`
+  ).join('');
+
+  body.innerHTML = `
+    <div class="question-block active">
+      <div class="question-number">Question ${currentQuestion + 1} of ${total}</div>
+      <div class="question-text">${q.q}</div>
+      <div class="options-list">${optionsHTML}</div>
+      <div class="feedback-box" id="feedbackBox"></div>
+      <div class="quiz-nav">
+        <span></span>
+        <button class="btn btn-primary" id="nextBtn" onclick="nextQuestion()" disabled>${currentQuestion === total - 1 ? 'See Results' : 'Next Question'}</button>
+      </div>
+    </div>
+  `;
+
+  answered = false;
+}
+
+function selectAnswer(idx) {
+  if (answered) return;
+  answered = true;
+
+  const session = SESSIONS[currentSession];
+  const q = session.questions[currentQuestion];
+  const correct = q.answer;
+
+  const buttons = document.querySelectorAll('.option-btn');
+  buttons.forEach(b => b.disabled = true);
+
+  if (idx === correct) {
+    buttons[idx].classList.add('correct');
+    showFeedback(true, q.explanation);
+  } else {
+    buttons[idx].classList.add('incorrect');
+    buttons[correct].classList.add('reveal-correct');
+    showFeedback(false, q.explanation);
+  }
+
+  // Track score
+  if (!sessionScores[currentSession]) sessionScores[currentSession] = { correct: 0, answered: 0, answers: [] };
+  sessionScores[currentSession].answered++;
+  sessionScores[currentSession].answers.push(idx === correct);
+  if (idx === correct) sessionScores[currentSession].correct++;
+
+  document.getElementById('nextBtn').disabled = false;
+}
+
+function showFeedback(isCorrect, explanation) {
+  const fb = document.getElementById('feedbackBox');
+  fb.className = 'feedback-box ' + (isCorrect ? 'correct-fb' : 'incorrect-fb');
+  fb.innerHTML = `<div class="feedback-label">${isCorrect ? '✓ Correct!' : '✗ Not quite.'}</div>${explanation}`;
+}
+
+function nextQuestion() {
+  const session = SESSIONS[currentSession];
+  if (currentQuestion < session.questions.length - 1) {
+    currentQuestion++;
+    answered = false;
+    renderQuestion();
+    const pct = (currentQuestion / session.questions.length) * 100;
+    document.getElementById('progressFill').style.width = pct + '%';
+    document.getElementById('progressLabel').textContent = `${currentQuestion} of ${session.questions.length}`;
+  } else {
+    showResults();
+  }
+}
+
+function showResults() {
+  const session = SESSIONS[currentSession];
+  const score = sessionScores[currentSession];
+  const pct = Math.round((score.correct / score.answered) * 100);
+
+  document.getElementById('progressFill').style.width = '100%';
+  document.getElementById('progressLabel').textContent = `${score.answered} of ${score.answered}`;
+
+  let ringClass = pct >= 80 ? 'high' : pct >= 60 ? 'mid' : 'low';
+  let message = pct === 100 ? 'Perfect score — you nailed it.' : pct >= 80 ? 'Strong result. You know this material.' : pct >= 60 ? 'Solid effort. A few concepts worth revisiting.' : 'Review the session content and try again.';
+
+  const nextIdx = currentSession < 8 ? currentSession + 1 : null;
+
+  document.getElementById('quizBody').innerHTML = `
+    <div class="results-block active">
+      <div class="score-ring ${ringClass}">${pct}%</div>
+      <h3>${session.title}</h3>
+      <p>${message}</p>
+      <div class="score-summary">
+        <div class="score-stat"><div class="val">${score.correct}</div><div class="lbl">Correct</div></div>
+        <div class="score-stat"><div class="val">${score.answered - score.correct}</div><div class="lbl">Missed</div></div>
+        <div class="score-stat"><div class="val">${pct}%</div><div class="lbl">Score</div></div>
+      </div>
+      <div class="result-actions" style="margin-top:28px;">
+        <button class="btn btn-ghost" onclick="retrySession()">Retry Session ${session.id}</button>
+        ${nextIdx !== null ? `<button class="btn btn-primary" onclick="loadSession(${nextIdx})">Next: Session ${nextIdx+1}</button>` : '<button class="btn btn-primary" onclick="loadSession(0)">Start Over</button>'}
+      </div>
+    </div>
+  `;
+
+  renderNav();
+}
+
+function retrySession() {
+  sessionScores[currentSession] = null;
+  loadSession(currentSession);
+}
+
+// Init
+renderNav();
+renderQuestion();
+</script>
+</body>
+</html>
